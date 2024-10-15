@@ -6,6 +6,31 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/urlInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter website URL"
+            android:inputType="textUri" />
+
+        <Button
+            android:id="@+id/generateQRButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Generate QR Code" />
+
+        <ImageView
+            android:id="@+id/qrCodeImageView"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:contentDescription="QR Code" />
+    </LinearLayout>
     <!--
    <include domain="sharedpref" path="."/>
    <exclude domain="sharedpref" path="device.xml"/>
