@@ -55,4 +55,8 @@ dependencies {
     // OkHttp for HTTP requests
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
+    //ZXing
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.3.3'
+
 }
