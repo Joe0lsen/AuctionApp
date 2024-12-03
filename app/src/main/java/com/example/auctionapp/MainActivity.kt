@@ -70,7 +70,9 @@ class MainActivity : AppCompatActivity() {
         val paddleNumberInput = dialog.findViewById<EditText>(R.id.paddleNumberInput)
         val bidAmountInput = dialog.findViewById<EditText>(R.id.bidAmountInput)
         val submitButton = dialog.findViewById<Button>(R.id.submitButton)
+        val viewBidsButton = dialog.findViewById<Button>(R.id.viewBidsButton)
 
+        // Submit bid logic
         submitButton.setOnClickListener {
             val paddleNumber = paddleNumberInput.text.toString()
             val bidAmount = bidAmountInput.text.toString()
@@ -87,6 +89,18 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // View existing bids
+        viewBidsButton.setOnClickListener {
+            val bids = dbHelper.getBidsForItem(itemNumber)
+            if (bids.isNotEmpty()) {
+                val message = bids.joinToString("\n") { "Paddle: ${it.first}, Bid: ${it.second}" }
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "No bids for this item", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         dialog.show()
     }
 
@@ -98,8 +112,23 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_settings -> true
+            R.id.action_clear_bids -> {
+                clearBids()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun clearBids() {
+        qrCodeResult?.let {
+            val success = dbHelper.deleteBidsForItem(it)
+            if (success) {
+                Toast.makeText(this, "All bids for $it cleared", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Failed to clear bids", Toast.LENGTH_SHORT).show()
+            }
+        } ?: Toast.makeText(this, "No item selected", Toast.LENGTH_SHORT).show()
     }
 
     override fun onSupportNavigateUp(): Boolean {
