@@ -12,8 +12,14 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.auctionapp.databinding.ActivityMainBinding
+import com.example.auctionapp.utils.MotherDuckConnectionHelper // Import helper
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.sql.Connection
 
 class MainActivity : AppCompatActivity() {
 
@@ -80,6 +86,18 @@ class MainActivity : AppCompatActivity() {
                 if (success) {
                     Toast.makeText(this, "Submit Successful!", Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
+
+                    // Sync the bid to MotherDuck
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val syncSuccess = syncBidToMotherDuck(itemNumber, paddleNumber, bidAmount.toDouble())
+                        withContext(Dispatchers.Main) {
+                            if (syncSuccess) {
+                                Toast.makeText(this@MainActivity, "Synced with MotherDuck!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this@MainActivity, "Failed to Sync with MotherDuck!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                 } else {
                     Toast.makeText(this, "Database Error", Toast.LENGTH_SHORT).show()
                 }
@@ -88,6 +106,29 @@ class MainActivity : AppCompatActivity() {
             }
         }
         dialog.show()
+    }
+
+    private suspend fun syncBidToMotherDuck(itemNumber: String, paddleNumber: String, bidAmount: Double): Boolean {
+        var connection: Connection? = null
+        return try {
+            connection = MotherDuckConnectionHelper.connect()
+            connection?.use {
+                val query = """
+                    INSERT INTO Bids (ItemNumber, PaddleNumber, BidAmount)
+                    VALUES (?, ?, ?)
+                """.trimIndent()
+                val preparedStatement = it.prepareStatement(query)
+                preparedStatement.setString(1, itemNumber)
+                preparedStatement.setString(2, paddleNumber)
+                preparedStatement.setDouble(3, bidAmount)
+                preparedStatement.executeUpdate() > 0
+            } ?: false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        } finally {
+            connection?.close()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -55,8 +55,10 @@ dependencies {
     // OkHttp for HTTP requests
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
-    //ZXing
+    // ZXing
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
     implementation 'com.google.zxing:core:3.3.3'
 
+    // DuckDB JDBC Driver (for connecting to MotherDuck)
+    implementation 'org.duckdb:duckdb_jdbc:0.8.1' // Use the latest version
 }
